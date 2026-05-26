@@ -106,18 +106,6 @@ export const products = [
     description: "High-energy return runner built for speed, breathable comfort, and long-distance support.",
   },
   {
-    id: "work-safety",
-    name: "Work Safety",
-    category: "Industrial Series",
-    rating: 4.7,
-    image:
-      "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=1200&q=80",
-    price: 15490,
-    moq: 500,
-    material: "Steel toe + abrasion-resistant leather",
-    description: "Protective work shoe designed for durability, impact resistance, and all-day jobsite comfort.",
-  },
-  {
     id: "kids-play",
     name: "Kids Play",
     category: "Junior Comfort",

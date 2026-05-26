@@ -18,6 +18,19 @@ body,
   min-height: 100%;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
 body {
   @apply bg-obsidian text-ivory font-body;
   background-image:
@@ -235,4 +248,39 @@ section {
 
 :root[data-theme="light"] [class*="border-white"] {
   border-color: rgba(80, 65, 51, 0.18) !important;
+}
+
+@media (max-width: 640px) {
+  section {
+    scroll-margin-top: 78px;
+  }
+
+  .section-title {
+    font-size: 1.9rem;
+    line-height: 1.2;
+  }
+
+  .section-subtitle {
+    letter-spacing: 0.2em;
+    font-size: 0.72rem;
+  }
+
+  .hero-stage {
+    border-radius: 1rem;
+  }
+
+  .card {
+    border-radius: 1.25rem;
+  }
+
+  .luxury-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  input,
+  textarea,
+  button {
+    font-size: 16px;
+  }
 }

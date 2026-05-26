@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { FaLeaf, FaPhoneAlt, FaShippingFast } from "react-icons/fa";
-import { HiMoon, HiOutlineMenuAlt3, HiSun, HiX } from "react-icons/hi";
+import { HiOutlineMenuAlt3, HiX } from "react-icons/hi";
 import { nav, process, products, reasons, stats, testimonials } from "./data/content";
 import heroImage from "./assets/hero-final.png";
 import ProductCard from "./components/ProductCard";
@@ -48,12 +48,6 @@ const Counter = ({ value }) => {
 };
 
 export default function App() {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window === "undefined") return "dark";
-    const savedTheme = window.localStorage.getItem("theme");
-    if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
-    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-  });
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -146,9 +140,8 @@ export default function App() {
   }, [selectedProduct]);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    window.localStorage.setItem("theme", theme);
-  }, [theme]);
+    document.documentElement.setAttribute("data-theme", "light");
+  }, []);
 
   useEffect(() => {
     if (!toastOpen) return undefined;
@@ -221,21 +214,13 @@ export default function App() {
     <div className="premium-shell relative overflow-hidden">
       <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/25 backdrop-blur-2xl">
         <nav className="mx-auto flex w-full max-w-[90rem] items-center justify-between px-4 py-4 md:px-6">
-          <h1 className="flex items-center gap-2 font-display text-2xl">
+          <h1 className="flex items-center gap-2 font-display text-xl sm:text-2xl">
             <span className="grid h-8 w-8 place-items-center rounded-full border border-sand/70 bg-white/5 text-sm text-sand">
               KF
             </span>
             <span>Kriscel Footwear</span>
           </h1>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-              className="rounded-full border border-white/20 bg-white/5 p-2 transition hover:border-sand/70 hover:text-sand"
-              onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-            >
-              {theme === "dark" ? <HiSun size={22} /> : <HiMoon size={22} />}
-            </button>
             <button
               type="button"
               aria-label="Toggle navigation"
@@ -308,7 +293,7 @@ export default function App() {
         </motion.div>
       </section>
 
-      <main className="relative z-[2] mx-auto w-full max-w-[90rem] space-y-24 px-4 py-20 md:px-6">
+      <main className="relative z-[2] mx-auto w-full max-w-[90rem] space-y-16 px-4 py-14 sm:space-y-20 sm:py-16 md:space-y-24 md:py-20 md:px-6">
         <section id="about" className="site-section reveal grid gap-6 md:grid-cols-4">
           {stats.map((s) => (
             <div className="card tilt3d p-6" key={s.label}>
@@ -337,7 +322,7 @@ export default function App() {
         <section id="manufacturing" className="site-section reveal">
           <p className="section-subtitle">Manufacturing Process</p>
           <h3 className="section-title">Precision at Every Step</h3>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
             {process.map((step, i) => (
               <div key={step} className="card tilt3d p-5">
                 <p className="text-sand">0{i + 1}</p>
