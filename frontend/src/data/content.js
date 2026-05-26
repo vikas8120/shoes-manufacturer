@@ -1,3 +1,6 @@
+import runningProCustomImage from "../assets/running-pro-custom.png";
+import loafersCustomImage from "../assets/loafers-custom.png";
+
 export const nav = ["Home", "About", "Products", "Manufacturing", "Custom Orders", "Wholesale", "Sustainability", "Contact"];
 
 export const stats = [
@@ -85,8 +88,7 @@ export const products = [
     name: "Loafers",
     category: "Smart Casual",
     rating: 4.8,
-    image:
-      "https://images.unsplash.com/photo-1614252369475-531eba835eb1?auto=format&fit=crop&w=1200&q=80",
+    image: loafersCustomImage,
     price: 12190,
     moq: 500,
     material: "Genuine leather upper",
@@ -97,8 +99,7 @@ export const products = [
     name: "Running Pro",
     category: "Performance Running",
     rating: 4.9,
-    image:
-      "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=1200&q=80",
+    image: runningProCustomImage,
     price: 13840,
     moq: 500,
     material: "Engineered mesh + foam midsole",

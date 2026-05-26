@@ -1,16 +1,15 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import { FaLeaf, FaPhoneAlt, FaShippingFast } from "react-icons/fa";
-import { HiOutlineMenuAlt3, HiShoppingBag, HiX } from "react-icons/hi";
+import { HiMoon, HiOutlineMenuAlt3, HiSun, HiX } from "react-icons/hi";
 import { nav, process, products, reasons, stats, testimonials } from "./data/content";
-import heroImage from "./assets/shoesimage.jpg";
+import heroImage from "./assets/hero-final.png";
 import ProductCard from "./components/ProductCard";
 import ProductModal from "./components/ProductModal";
-import CartDrawer from "./components/CartDrawer";
 import Toast from "./components/Toast";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -25,8 +24,6 @@ const NAV_TARGETS = {
   Sustainability: "sustainability",
   Contact: "contact",
 };
-
-const CART_STORAGE_KEY = "veloura_cart";
 
 const Counter = ({ value }) => {
   const [count, setCount] = useState(0);
@@ -51,12 +48,30 @@ const Counter = ({ value }) => {
 };
 
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "dark";
+    const savedTheme = window.localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  });
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const [cartItems, setCartItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [toastMessage, setToastMessage] = useState("");
+  const [toastOpen, setToastOpen] = useState(false);
+
+  const [quoteForm, setQuoteForm] = useState({
+    companyName: "",
+    email: "",
+    moq: "",
+    projectDetails: "",
+  });
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [newsletterEmail, setNewsletterEmail] = useState("");
 
   useEffect(() => {
     gsap.utils.toArray(".reveal").forEach((section) => {
@@ -71,6 +86,33 @@ export default function App() {
         },
       });
     });
+  }, []);
+
+  useEffect(() => {
+    const tiltNodes = Array.from(document.querySelectorAll(".tilt3d"));
+    const cleanupFns = tiltNodes.map((node) => {
+      const handleMove = (event) => {
+        const rect = node.getBoundingClientRect();
+        const px = (event.clientX - rect.left) / rect.width;
+        const py = (event.clientY - rect.top) / rect.height;
+        const rotateY = (px - 0.5) * 12;
+        const rotateX = (0.5 - py) * 12;
+        node.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
+      };
+
+      const handleLeave = () => {
+        node.style.transform = "";
+      };
+
+      node.addEventListener("mousemove", handleMove);
+      node.addEventListener("mouseleave", handleLeave);
+      return () => {
+        node.removeEventListener("mousemove", handleMove);
+        node.removeEventListener("mouseleave", handleLeave);
+      };
+    });
+
+    return () => cleanupFns.forEach((fn) => fn());
   }, []);
 
   useEffect(() => {
@@ -95,39 +137,24 @@ export default function App() {
 
     return () => observer.disconnect();
   }, []);
-
   useEffect(() => {
-    const saved = localStorage.getItem(CART_STORAGE_KEY);
-    if (!saved) return;
-
-    try {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) setCartItems(parsed);
-    } catch {
-      setCartItems([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  useEffect(() => {
-    if (!toastMessage) return;
-
-    const timer = setTimeout(() => setToastMessage(""), 1800);
-    return () => clearTimeout(timer);
-  }, [toastMessage]);
-
-  useEffect(() => {
-    document.body.style.overflow = isCartOpen || selectedProduct ? "hidden" : "";
+    document.body.style.overflow = selectedProduct ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isCartOpen, selectedProduct]);
+  }, [selectedProduct]);
 
-  const totalCartItems = useMemo(() => cartItems.reduce((sum, item) => sum + item.quantity, 0), [cartItems]);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    if (!toastOpen) return undefined;
+    const timeoutId = setTimeout(() => setToastOpen(false), 2800);
+    return () => clearTimeout(timeoutId);
+  }, [toastOpen]);
 
   const handleNavClick = (item) => {
     const targetId = NAV_TARGETS[item];
@@ -142,39 +169,58 @@ export default function App() {
 
   const isActiveLink = (item) => activeSection === NAV_TARGETS[item];
 
-  const handleAddToCart = (product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) => (item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
-      }
-
-      return [...prev, { ...product, quantity: 1 }];
-    });
-
-    setToastMessage("Product added to cart");
+  const showToast = (message) => {
+    setToastMessage(message);
+    setToastOpen(false);
+    requestAnimationFrame(() => setToastOpen(true));
   };
 
-  const changeQuantity = (productId, delta) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) => (item.id === productId ? { ...item, quantity: item.quantity + delta } : item))
-        .filter((item) => item.quantity > 0)
-    );
+  const isValidEmail = (value) => /\S+@\S+\.\S+/.test(value);
+
+  const handleQuoteSubmit = (event) => {
+    event.preventDefault();
+    const { companyName, email, moq, projectDetails } = quoteForm;
+    if (!companyName.trim() || !email.trim() || !moq.trim() || !projectDetails.trim()) {
+      showToast("Please fill all quote request fields.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      showToast("Please enter a valid business email address.");
+      return;
+    }
+    showToast("Quote request sent. Our team will contact you soon.");
+    setQuoteForm({ companyName: "", email: "", moq: "", projectDetails: "" });
   };
 
-  const removeFromCart = (productId) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== productId));
+  const handleContactSubmit = (event) => {
+    event.preventDefault();
+    const { name, email, message } = contactForm;
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      showToast("Please complete all contact fields.");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      showToast("Please enter a valid email address.");
+      return;
+    }
+    showToast("Message sent successfully. We will reply shortly.");
+    setContactForm({ name: "", email: "", message: "" });
   };
 
-  const clearCart = () => {
-    setCartItems([]);
+  const handleNewsletterSubmit = (event) => {
+    event.preventDefault();
+    if (!newsletterEmail.trim() || !isValidEmail(newsletterEmail)) {
+      showToast("Please enter a valid email for newsletter signup.");
+      return;
+    }
+    showToast("Thanks for subscribing to Kriscel Footwear updates.");
+    setNewsletterEmail("");
   };
 
   return (
-    <div className="relative overflow-hidden">
-      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/35 backdrop-blur-xl">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+    <div className="premium-shell relative overflow-hidden">
+      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/25 backdrop-blur-2xl">
+        <nav className="mx-auto flex w-full max-w-[90rem] items-center justify-between px-4 py-4 md:px-6">
           <h1 className="flex items-center gap-2 font-display text-2xl">
             <span className="grid h-8 w-8 place-items-center rounded-full border border-sand/70 bg-white/5 text-sm text-sand">
               KF
@@ -184,16 +230,11 @@ export default function App() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              aria-label="Open cart"
-              onClick={() => setIsCartOpen(true)}
-              className="relative rounded-full border border-white/20 bg-white/5 p-2 transition hover:border-sand/70 hover:text-sand"
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+              className="rounded-full border border-white/20 bg-white/5 p-2 transition hover:border-sand/70 hover:text-sand"
+              onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
             >
-              <HiShoppingBag size={22} />
-              {totalCartItems > 0 ? (
-                <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-sand px-1.5 text-center text-xs font-semibold text-obsidian">
-                  {totalCartItems}
-                </span>
-              ) : null}
+              {theme === "dark" ? <HiSun size={22} /> : <HiMoon size={22} />}
             </button>
             <button
               type="button"
@@ -252,46 +293,25 @@ export default function App() {
         </AnimatePresence>
       </header>
 
-      <section
-        id="home"
-        className="site-section hero relative flex min-h-screen items-center px-6 pt-[96px] text-white"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url(${heroImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-8 lg:grid-cols-2">
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.1 }}>
-            <p className="section-subtitle">Luxury Shoe Manufacturing</p>
-            <h2 className="font-display text-5xl leading-tight md:text-7xl">Crafting Premium Footwear for the World</h2>
-            <p className="mt-5 max-w-xl text-lg text-ivory/95">
-              Luxury Shoe Manufacturing with Innovation, Comfort and Precision.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <button
-                type="button"
-                onClick={() => handleNavClick("Products")}
-                className="luxury-btn-primary hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Explore Collection
-              </button>
-              <button
-                type="button"
-                onClick={() => handleNavClick("Wholesale")}
-                className="luxury-btn-secondary hover:scale-[1.02] active:scale-[0.98]"
-              >
-                Become a Partner
-              </button>
-            </div>
-          </motion.div>
-        </div>
+      <section id="home" className="site-section hero relative pt-[81px]">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9 }}
+          className="hero-stage tilt3d h-full w-full overflow-hidden border-y border-white/15 bg-[#ece5d8]"
+        >
+          <img
+            src={heroImage}
+            alt="Premium shoes manufacturer hero banner"
+            className="hero-image block h-auto w-full object-contain"
+          />
+        </motion.div>
       </section>
 
-      <main className="relative z-[2] mx-auto max-w-7xl space-y-24 px-6 py-20">
+      <main className="relative z-[2] mx-auto w-full max-w-[90rem] space-y-24 px-4 py-20 md:px-6">
         <section id="about" className="site-section reveal grid gap-6 md:grid-cols-4">
           {stats.map((s) => (
-            <div className="card p-6" key={s.label}>
+            <div className="card tilt3d p-6" key={s.label}>
               <p className="text-3xl font-bold text-sand">
                 <Counter value={s.value} />
               </p>
@@ -319,7 +339,7 @@ export default function App() {
           <h3 className="section-title">Precision at Every Step</h3>
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {process.map((step, i) => (
-              <div key={step} className="card p-5">
+              <div key={step} className="card tilt3d p-5">
                 <p className="text-sand">0{i + 1}</p>
                 <h4 className="mt-2 font-semibold">{step}</h4>
               </div>
@@ -329,7 +349,7 @@ export default function App() {
 
         <section id="wholesale" className="site-section reveal grid gap-5 md:grid-cols-3">
           {reasons.map((item) => (
-            <div className="card p-6" key={item}>
+            <div className="card tilt3d p-6" key={item}>
               <h4 className="text-xl font-semibold">{item}</h4>
               <p className="mt-2 text-ivory/70">
                 Built for premium quality and global consistency across every production batch.
@@ -347,12 +367,33 @@ export default function App() {
               packaging personalization available.
             </p>
           </div>
-          <form className="card grid gap-4 p-6">
-            <input className="rounded-xl bg-white/10 p-3" placeholder="Company Name" />
-            <input className="rounded-xl bg-white/10 p-3" placeholder="Email" />
-            <input className="rounded-xl bg-white/10 p-3" placeholder="MOQ Required" />
-            <textarea className="rounded-xl bg-white/10 p-3" rows="4" placeholder="Project Details" />
-            <button className="luxury-btn-primary">Request Manufacturing Quote</button>
+          <form className="card grid gap-4 p-6" onSubmit={handleQuoteSubmit}>
+            <input
+              className="rounded-xl bg-white/10 p-3"
+              placeholder="Company Name"
+              value={quoteForm.companyName}
+              onChange={(event) => setQuoteForm((prev) => ({ ...prev, companyName: event.target.value }))}
+            />
+            <input
+              className="rounded-xl bg-white/10 p-3"
+              placeholder="Email"
+              value={quoteForm.email}
+              onChange={(event) => setQuoteForm((prev) => ({ ...prev, email: event.target.value }))}
+            />
+            <input
+              className="rounded-xl bg-white/10 p-3"
+              placeholder="MOQ Required"
+              value={quoteForm.moq}
+              onChange={(event) => setQuoteForm((prev) => ({ ...prev, moq: event.target.value }))}
+            />
+            <textarea
+              className="rounded-xl bg-white/10 p-3"
+              rows="4"
+              placeholder="Project Details"
+              value={quoteForm.projectDetails}
+              onChange={(event) => setQuoteForm((prev) => ({ ...prev, projectDetails: event.target.value }))}
+            />
+            <button type="submit" className="luxury-btn-primary">Request Manufacturing Quote</button>
           </form>
         </section>
 
@@ -411,17 +452,33 @@ export default function App() {
             <p className="text-ivory/80">89 Leather District, Milan Trade Hub</p>
             <div className="mt-4 h-56 rounded-2xl bg-white/10 p-4 text-ivory/70">Google Map Integration Area</div>
           </div>
-          <form className="card grid gap-4 p-6">
-            <input className="rounded-xl bg-white/10 p-3" placeholder="Name" />
-            <input className="rounded-xl bg-white/10 p-3" placeholder="Email" />
-            <textarea className="rounded-xl bg-white/10 p-3" rows="6" placeholder="Message" />
-            <button className="luxury-btn-primary">Send Message</button>
+          <form className="card grid gap-4 p-6" onSubmit={handleContactSubmit}>
+            <input
+              className="rounded-xl bg-white/10 p-3"
+              placeholder="Name"
+              value={contactForm.name}
+              onChange={(event) => setContactForm((prev) => ({ ...prev, name: event.target.value }))}
+            />
+            <input
+              className="rounded-xl bg-white/10 p-3"
+              placeholder="Email"
+              value={contactForm.email}
+              onChange={(event) => setContactForm((prev) => ({ ...prev, email: event.target.value }))}
+            />
+            <textarea
+              className="rounded-xl bg-white/10 p-3"
+              rows="6"
+              placeholder="Message"
+              value={contactForm.message}
+              onChange={(event) => setContactForm((prev) => ({ ...prev, message: event.target.value }))}
+            />
+            <button type="submit" className="luxury-btn-primary">Send Message</button>
           </form>
         </section>
       </main>
 
       <footer className="border-t border-white/10 bg-black/40 px-6 py-12">
-        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4">
+        <div className="mx-auto grid w-full max-w-[90rem] gap-8 px-4 md:grid-cols-4 md:px-6">
           <div>
             <h5 className="flex items-center gap-2 font-display text-2xl">
               <span className="grid h-8 w-8 place-items-center rounded-full border border-sand/70 bg-white/5 text-sm text-sand">
@@ -441,30 +498,33 @@ export default function App() {
           </div>
           <div>
             <p className="font-semibold">Newsletter</p>
-            <input className="mt-3 w-full rounded-xl bg-white/10 p-2" placeholder="Your email" />
+            <form onSubmit={handleNewsletterSubmit}>
+              <input
+                className="mt-3 w-full rounded-xl bg-white/10 p-2"
+                placeholder="Your email"
+                value={newsletterEmail}
+                onChange={(event) => setNewsletterEmail(event.target.value)}
+              />
+            </form>
           </div>
           <div className="text-sm text-ivory/70">© 2026 Kriscel Footwear. All rights reserved.</div>
         </div>
       </footer>
-
-      <CartDrawer
-        open={isCartOpen}
-        items={cartItems}
-        onClose={() => setIsCartOpen(false)}
-        onIncrease={(productId) => changeQuantity(productId, 1)}
-        onDecrease={(productId) => changeQuantity(productId, -1)}
-        onRemove={removeFromCart}
-        onClear={clearCart}
-      />
 
       <ProductModal
         product={selectedProduct}
         open={Boolean(selectedProduct)}
         onClose={() => setSelectedProduct(null)}
       />
-
-      <Toast message={toastMessage} open={Boolean(toastMessage)} />
+      <Toast message={toastMessage} open={toastOpen} />
     </div>
   );
 }
+
+
+
+
+
+
+
 
