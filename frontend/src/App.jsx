@@ -7,7 +7,7 @@ import { Autoplay, Pagination } from "swiper/modules";
 import { FaLeaf, FaPhoneAlt, FaShippingFast } from "react-icons/fa";
 import { HiOutlineMenuAlt3, HiX } from "react-icons/hi";
 import { nav, process, products, reasons, stats, testimonials } from "./data/content";
-import heroImage from "./assets/hero-final.png";
+import heroVideo from "./assets/shoes-hero.mp4";
 import ProductCard from "./components/ProductCard";
 import ProductModal from "./components/ProductModal";
 import Toast from "./components/Toast";
@@ -212,10 +212,10 @@ export default function App() {
 
   return (
     <div className="premium-shell relative overflow-hidden">
-      <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/25 backdrop-blur-2xl">
+      <header className="fixed top-0 z-50 w-full border-b border-[#d9cfc7] bg-white/90 text-obsidian backdrop-blur-2xl">
         <nav className="mx-auto flex w-full max-w-[90rem] items-center justify-between px-4 py-4 md:px-6">
           <h1 className="flex items-center gap-2 font-display text-xl sm:text-2xl">
-            <span className="grid h-8 w-8 place-items-center rounded-full border border-sand/70 bg-white/5 text-sm text-sand">
+            <span className="grid h-8 w-8 place-items-center rounded-full border border-[#c9b59c] bg-[#f9f8f6] text-sm text-obsidian">
               KF
             </span>
             <span>Kriscel Footwear</span>
@@ -225,7 +225,7 @@ export default function App() {
               type="button"
               aria-label="Toggle navigation"
               aria-expanded={menuOpen}
-              className="rounded-full border border-white/20 bg-white/5 p-2 transition hover:border-sand/70 hover:text-sand md:hidden"
+              className="rounded-full border border-[#c9b59c] bg-[#f9f8f6] p-2 transition hover:border-[#c9b59c] hover:text-obsidian md:hidden"
               onClick={() => setMenuOpen((v) => !v)}
             >
               {menuOpen ? <HiX size={24} /> : <HiOutlineMenuAlt3 size={24} />}
@@ -239,8 +239,8 @@ export default function App() {
                   onClick={() => handleNavClick(item)}
                   className={`rounded-full px-3 py-1.5 transition ${
                     isActiveLink(item)
-                      ? "bg-white/10 text-sand shadow-[0_0_0_1px_rgba(215,196,164,0.45)]"
-                      : "text-ivory/85 hover:text-sand"
+                      ? "bg-[#efe9e3] text-obsidian shadow-[0_0_0_1px_rgba(201,181,156,0.45)]"
+                      : "text-obsidian/80 hover:text-leather"
                   }`}
                 >
                   {item}
@@ -256,7 +256,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="grid gap-2 border-t border-white/10 bg-black/85 p-4 backdrop-blur-xl md:hidden"
+              className="grid gap-2 border-t border-[#e6d8c6] bg-white/95 p-4 backdrop-blur-xl md:hidden"
             >
               {nav.map((item) => (
                 <li key={item}>
@@ -265,8 +265,8 @@ export default function App() {
                     onClick={() => handleNavClick(item)}
                     className={`w-full rounded-xl px-3 py-2 text-left transition ${
                       isActiveLink(item)
-                        ? "bg-white/10 text-sand shadow-[0_0_0_1px_rgba(215,196,164,0.45)]"
-                        : "text-ivory/90 hover:bg-white/5 hover:text-sand"
+                        ? "bg-[#efe9e3] text-obsidian shadow-[0_0_0_1px_rgba(201,181,156,0.45)]"
+                        : "text-obsidian/90 hover:bg-[#f9f8f6] hover:text-obsidian"
                     }`}
                   >
                     {item}
@@ -278,34 +278,35 @@ export default function App() {
         </AnimatePresence>
       </header>
 
-      <section id="home" className="site-section hero relative pt-[81px]">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9 }}
-          className="hero-stage tilt3d h-full w-full overflow-hidden border-y border-white/15 bg-[#ece5d8]"
-        >
-          <img
-            src={heroImage}
-            alt="Premium shoes manufacturer hero banner"
-            className="hero-image block h-auto w-full object-contain"
-          />
-        </motion.div>
+      <section id="home" className="site-section hero relative">
+        <div className="hero-stage h-full w-full overflow-hidden bg-[#f9f8f6]">
+          <video
+            className="hero-media"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+        </div>
       </section>
 
-      <main className="relative z-[2] mx-auto w-full max-w-[90rem] space-y-16 px-4 py-14 sm:space-y-20 sm:py-16 md:space-y-24 md:py-20 md:px-6">
-        <section id="about" className="site-section reveal grid gap-6 md:grid-cols-4">
+      <main className="relative z-[2] mx-auto w-full max-w-[90rem] space-y-8 px-4 py-14 sm:space-y-10 sm:py-16 md:space-y-12 md:py-20 md:px-6">
+        <section id="about" className="site-section reveal section-panel section-tone-1 grid gap-6 md:grid-cols-4">
           {stats.map((s) => (
             <div className="card tilt3d p-6" key={s.label}>
               <p className="text-3xl font-bold text-sand">
                 <Counter value={s.value} />
               </p>
-              <p className="mt-1 text-ivory/75">{s.label}</p>
+              <p className="mt-1 text-obsidian/70">{s.label}</p>
             </div>
           ))}
         </section>
 
-        <section id="products" className="site-section reveal">
+        <section id="products" className="site-section reveal section-panel section-tone-2">
           <p className="section-subtitle">Featured Products</p>
           <h3 className="section-title">Luxury Collections</h3>
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -319,7 +320,7 @@ export default function App() {
           </div>
         </section>
 
-        <section id="manufacturing" className="site-section reveal">
+        <section id="manufacturing" className="site-section reveal section-panel section-tone-3">
           <p className="section-subtitle">Manufacturing Process</p>
           <h3 className="section-title">Precision at Every Step</h3>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
@@ -332,7 +333,7 @@ export default function App() {
           </div>
         </section>
 
-        <section id="wholesale" className="site-section reveal grid gap-5 md:grid-cols-3">
+        <section id="wholesale" className="site-section reveal section-panel section-tone-4 grid gap-5 md:grid-cols-3">
           {reasons.map((item) => (
             <div className="card tilt3d p-6" key={item}>
               <h4 className="text-xl font-semibold">{item}</h4>
@@ -343,7 +344,7 @@ export default function App() {
           ))}
         </section>
 
-        <section id="custom-orders" className="site-section reveal grid gap-8 lg:grid-cols-2">
+        <section id="custom-orders" className="site-section reveal section-panel section-tone-1 grid gap-8 lg:grid-cols-2">
           <div>
             <p className="section-subtitle">Custom Shoe Manufacturing</p>
             <h3 className="section-title">OEM and ODM for Global Brands</h3>
@@ -382,7 +383,7 @@ export default function App() {
           </form>
         </section>
 
-        <section className="site-section reveal">
+        <section className="site-section reveal section-panel section-tone-2">
           <p className="section-subtitle">Testimonials</p>
           <h3 className="section-title">Trusted by Premium Clients</h3>
           <Swiper modules={[Autoplay, Pagination]} autoplay={{ delay: 3500 }} pagination={{ clickable: true }} className="mt-7">
@@ -399,7 +400,7 @@ export default function App() {
 
         <section
           id="sustainability"
-          className="site-section reveal section-surface rounded-3xl grid gap-6 p-8 lg:grid-cols-2"
+          className="site-section reveal section-panel section-surface section-tone-3 grid gap-6 lg:grid-cols-2"
         >
           <div>
             <p className="section-subtitle">Sustainability</p>
@@ -429,13 +430,40 @@ export default function App() {
           </div>
         </section>
 
-        <section id="contact" className="site-section reveal grid gap-8 lg:grid-cols-2">
+        <section id="contact" className="site-section reveal section-panel section-tone-4 grid gap-8 lg:grid-cols-2">
           <div className="card p-6">
-            <h4 className="text-2xl font-semibold">Contact</h4>
-            <p className="mt-3 text-ivory/80">hello@kriscelfootwear.com</p>
-            <p className="text-ivory/80">+1 (212) 555-0188</p>
-            <p className="text-ivory/80">89 Leather District, Milan Trade Hub</p>
-            <div className="mt-4 h-56 rounded-2xl bg-white/10 p-4 text-ivory/70">Google Map Integration Area</div>
+            <p className="section-subtitle">Contact Kriscel Tech</p>
+            <h4 className="text-2xl font-semibold text-obsidian">Business Automation & Digital Growth Partner</h4>
+            <p className="mt-3 text-obsidian/75">
+              Kriscel Tech Pvt. Ltd. helps businesses with automation, digital marketing, ecommerce services, and
+              recruitment solutions.
+            </p>
+            <div className="mt-6 grid gap-4 text-sm text-obsidian/80">
+            <div className="rounded-2xl border border-[#d9cfc7] bg-[#f9f8f6] p-4">
+                <p className="font-semibold text-leather">Phone</p>
+                <p className="mt-1">+91 8985419420</p>
+              </div>
+            <div className="rounded-2xl border border-[#d9cfc7] bg-[#f9f8f6] p-4">
+                <p className="font-semibold text-leather">Email</p>
+                <p className="mt-1">Info@kriscel.com</p>
+              </div>
+            <div className="rounded-2xl border border-[#d9cfc7] bg-[#f9f8f6] p-4">
+                <p className="font-semibold text-leather">Address</p>
+                <p className="mt-1">
+                  229, Bharthal, Sector 26, Dwarka, South West Delhi, Delhi, 110077
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 rounded-2xl border border-[#d9cfc7] bg-[#efe9e3] p-4 text-sm text-obsidian/75">
+              <p className="font-semibold text-leather">Core services</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {["Business Automation", "Digital Marketing", "Ecommerce Services", "Recruitment"].map((item) => (
+                    <span key={item} className="rounded-full border border-[#c9b59c] bg-[#f9f8f6] px-3 py-1">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
           <form className="card grid gap-4 p-6" onSubmit={handleContactSubmit}>
             <input
@@ -462,20 +490,20 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="border-t border-white/10 bg-black/40 px-6 py-12">
+      <footer className="border-t border-[#d9cfc7] bg-[#f9f8f6] px-6 py-12">
         <div className="mx-auto grid w-full max-w-[90rem] gap-8 px-4 md:grid-cols-4 md:px-6">
           <div>
             <h5 className="flex items-center gap-2 font-display text-2xl">
-              <span className="grid h-8 w-8 place-items-center rounded-full border border-sand/70 bg-white/5 text-sm text-sand">
+              <span className="grid h-8 w-8 place-items-center rounded-full border border-[#c9b59c] bg-[#f9f8f6] text-sm text-obsidian">
                 KF
               </span>
               <span>Kriscel Footwear</span>
             </h5>
-            <p className="mt-2 text-sm text-ivory/70">Premium footwear manufacturing for B2B and B2C global markets.</p>
+            <p className="mt-2 text-sm text-obsidian/70">Premium footwear manufacturing for B2B and B2C global markets.</p>
           </div>
           <div>
             <p className="font-semibold">Quick Links</p>
-            <ul className="mt-2 space-y-1 text-sm text-ivory/75">
+            <ul className="mt-2 space-y-1 text-sm text-obsidian/70">
               {nav.slice(0, 5).map((i) => (
                 <li key={i}>{i}</li>
               ))}
@@ -492,7 +520,7 @@ export default function App() {
               />
             </form>
           </div>
-          <div className="text-sm text-ivory/70">© 2026 Kriscel Footwear. All rights reserved.</div>
+          <div className="text-sm text-obsidian/70">© 2026 Kriscel Footwear. All rights reserved.</div>
         </div>
       </footer>
 
